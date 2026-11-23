@@ -71,6 +71,7 @@ int main() {
     if (in) {
         ofstream out("result.txt");
         int count = 0;
+        
         while (in >> price) {
             if (!getline(in >> ws, name)) break;
             if (price > limit) {
