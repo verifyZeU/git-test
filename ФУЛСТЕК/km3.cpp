@@ -37,6 +37,9 @@ void perm(string s, string word) {
     }
 }
 
+// 142891
+
+
 int main() {
 #ifdef _WIN32
     SetConsoleCP(CP_UTF8);
@@ -71,7 +74,7 @@ int main() {
     if (in) {
         ofstream out("result.txt");
         int count = 0;
-        
+
         while (in >> price) {
             if (!getline(in >> ws, name)) break;
             if (price > limit) {
@@ -108,3 +111,9 @@ int main() {
     cout << "Ответ №3. Сумма: " << fixed << sum << '\n';
     return 0;
 }
+
+
+
+
+
+
