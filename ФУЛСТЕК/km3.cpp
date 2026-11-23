@@ -1,32 +1,38 @@
-// Кирпа Артемий, ЭФБО-08-26. Контрольная работа №3, часть 1, вариант 8.
+// Кирпа Артемий, ЭФБО-08-26. Контрольная работа №3, вариант 8.
 #include <iostream>
 #include <fstream>
-#include <iomanip>
 #include <string>
-#include <vector>
-#include <utility>
 #ifdef _WIN32
 #include <windows.h>
 #endif
-
 using namespace std;
 
-// Задание 1. По очереди ставим каждую букву на место k.
-void perm(vector<string>& a, int k) {
-    int n = a.size();
-    if (k == n) {
-        for (const string& ch : a) cout << ch;
-        cout << '\n';
+// Одна буква в UTF-8 может занимать несколько байтов.
+string letter(const string& s, size_t i) {
+    size_t end = i + 1;
+    while (end < s.size()) {
+        unsigned char c = s[end];
+        if (c < 128 || c >= 192) break;
+        end++;
+    }
+    return s.substr(i, end - i);
+}
+
+// s — оставшиеся буквы, word — уже собранная часть слова.
+void perm(string s, string word) {
+    if (s.empty()) {
+        cout << word << '\n';
         return;
     }
 
-    string used;
-    for (int i = k; i < n; i++) {
-        if (used.find(a[i]) != string::npos) continue;
-        used += a[i];
-        swap(a[k], a[i]);
-        perm(a, k + 1);
-        swap(a[k], a[i]);
+    for (size_t i = 0; i < s.size(); ) {
+        string ch = letter(s, i);
+        if (s.find(ch) == i) {  // Одинаковую букву выбираем один раз.
+            string rest = s;
+            rest.erase(i, ch.size());
+            perm(rest, word + ch);
+        }
+        i += ch.size();
     }
 }
 
@@ -36,42 +42,36 @@ int main() {
     SetConsoleOutputCP(CP_UTF8);
 #endif
 
-    // Задание 1. Выводим перестановки строки.
+    // №1. Перестановки строки
     string s;
     cout << "1. Введите короткую строку: ";
     getline(cin, s);
-
-    // Буква в UTF-8 может занимать несколько байтов.
-    vector<string> a;
-    for (unsigned char c : s) {
-        if ((c & 0xC0) != 0x80) a.push_back("");
-        a.back() += static_cast<char>(c);
-    }
-
     cout << "Ответ №1. Перестановки:\n";
-    perm(a, 0);
+    perm(s, "");
 
-    // Задание 2. Отбираем товары из файла по цене.
-    cout << "\n2. Введите порог цены: ";
+    // №2. Товары дороже заданной цены
     double limit, price;
-    if (!(cin >> limit)) return 1;
+    string name;
+    cout << "\n2. Введите порог цены: ";
+    if (!(cin >> limit)) {
+        cout << "Нужно ввести число.\n";
+        return 1;
+    }
 
     ifstream in("goods.txt");
     if (!in) {
-        ofstream sample("goods.txt");
-        sample << "35 Ручка\n80 Тетрадь\n120 Цветные карандаши\n250 Пенал\n";
-        sample.close();
+        ofstream file("goods.txt");
+        file << "35 Ручка\n80 Тетрадь\n120 Цветные карандаши\n250 Пенал\n";
+        file.close();
         in.open("goods.txt");
     }
 
     cout << "Ответ №2. Товары дороже " << limit << ":\n";
-    if (!in) {
-        cout << "Не удалось открыть goods.txt.\n";
-    } else {
+    if (in) {
         ofstream out("result.txt");
-        string name;
         int count = 0;
-        while (in >> price && getline(in >> ws, name)) {
+        while (in >> price) {
+            if (!getline(in >> ws, name)) break;
             if (price > limit) {
                 cout << name << " — " << price << '\n';
                 out << name << " — " << price << '\n';
@@ -82,17 +82,19 @@ int main() {
         out.close();
         if (out) cout << "Записано в result.txt: " << count << '\n';
         else cout << "Не удалось записать result.txt.\n";
+    } else {
+        cout << "Не удалось открыть goods.txt.\n";
     }
 
-    // Задание 3. Складываем числа.
+    // №3. Сумма чисел
     int n;
     double x, sum = 0;
     cout << "\n3. Сколько чисел нужно сложить? ";
     if (!(cin >> n) || n < 0) {
-        cout << "Введите целое неотрицательное количество.\n";
+        cout << "Нужно ввести целое число от нуля.\n";
         return 1;
     }
-    if (n > 0) cout << "Введите числа через пробел (например, 1.5 2.75): ";
+    if (n > 0) cout << "Введите числа через пробел: ";
     for (int i = 0; i < n; i++) {
         if (!(cin >> x)) {
             cout << "Не удалось прочитать число.\n";
@@ -100,6 +102,7 @@ int main() {
         }
         sum += x;
     }
-    cout << "Ответ №3. Сумма: " << fixed << setprecision(2) << sum << '\n';
+    cout.precision(2);
+    cout << "Ответ №3. Сумма: " << fixed << sum << '\n';
     return 0;
 }
