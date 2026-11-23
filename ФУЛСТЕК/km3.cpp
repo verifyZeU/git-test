@@ -18,6 +18,7 @@ string letter(const string& s, size_t i) {
     return s.substr(i, end - i);
 }
 
+
 // s — оставшиеся буквы, word — уже собранная часть слова.
 void perm(string s, string word) {
     if (s.empty()) {
